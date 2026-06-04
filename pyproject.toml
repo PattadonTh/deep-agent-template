@@ -1,0 +1,31 @@
+[project]
+name = "your-project-name"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "deepagents",
+    "langgraph",
+    "langchain",
+    "langchain-core",
+    "pydantic",
+    "python-dotenv",
+    "chromadb",
+    "anthropic",
+    "langchain-anthropic",
+    "sentence-transformers",
+    "langchain-community",
+]
+
+[tool.setuptools.packages.find]
+include = ["memory*", "tools*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

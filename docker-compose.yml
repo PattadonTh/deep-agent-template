@@ -1,0 +1,9 @@
+services:
+  agent:
+    build: .
+    env_file: .env
+    command: ["--task", "your task here"] # ← replace with your task
+    volumes:
+      - ./outputs:/app/outputs
+      - ./chroma_db:/app/chroma_db
+      - ./workspace:/app/workspace
