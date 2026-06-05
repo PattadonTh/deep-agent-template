@@ -127,3 +127,20 @@ Then add `elif backend == "pinecone"` in `memory/backends/__init__.py` and set `
 ## Environment variables
 
 See `.env.example` for all available options.
+
+## Observability (optional)
+
+Enable LangSmith tracing to monitor every agent run:
+
+1. Get a free API key at **smith.langchain.com**
+2. Uncomment in `.env`:
+
+```dotenv
+LANGCHAIN_API_KEY=ls__...
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=your-project-name
+```
+
+3. Run your agent — traces appear automatically in **Projects** on LangSmith
+
+Each trace shows every node, tool call, skill load, and token usage per run.
