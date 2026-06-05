@@ -18,9 +18,8 @@ from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
+from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
 from tools import web_search, read_file, write_file
-from tools.shell import run_command
 
 load_dotenv()
 
@@ -47,13 +46,11 @@ def get_model(
     model: str = os.getenv("MODEL", "claude-haiku-4-5"),
     provider: str = os.getenv("PROVIDER", "anthropic"),
     max_retries: int = 3,
-    timeout: int = 60,
 ) -> BaseChatModel:
     return init_chat_model(
         model,
         model_provider=provider,
         max_retries=max_retries,
-        request_timeout=timeout,
     )
 
 
@@ -61,7 +58,7 @@ def get_model(
 # 3. Paths & Setup
 # ═══════════════════════════════════════════════════════
 
-SKILLS_DIR = Path("skills")
+SKILLS_DIR = Path(__file__).parent / "skills"
 
 
 # ═══════════════════════════════════════════════════════
@@ -106,21 +103,20 @@ def get_subagent() -> dict:
 
 
 def create_agent(use_subagents: bool = False):
-    backend = StateBackend()
     subagents = [get_subagent()] if use_subagents else None
-
+    backend = CompositeBackend(
+        default=StateBackend(),
+        routes={
+            "/skills/": FilesystemBackend(root_dir=str(SKILLS_DIR), virtual_mode=True),
+        },
+    )
     return create_deep_agent(
         model=get_model(),
-        tools=[
-            web_search,
-            read_file,
-            write_file,
-            run_command,
-        ],  # add or remove tools here
+        tools=[web_search, read_file, write_file],  # add or remove tools here
         system_prompt=SYSTEM_PROMPT,
         response_format=AgentOutput,
         backend=backend,
-        skills=[str(SKILLS_DIR)] if SKILLS_DIR.exists() else None,
+        skills=["/skills"],
         subagents=subagents,
         interrupt_on=None,
         checkpointer=None,
